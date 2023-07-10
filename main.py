@@ -79,6 +79,7 @@ def get_phone(name):
         raise KeyError(f"Contact '{name}' not found.")
 
 
+@input_error
 def show_all_contacts():
     if not address_book.data:
         return "There are no contacts saved."
