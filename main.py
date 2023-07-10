@@ -50,7 +50,9 @@ address_book = AddressBook()
 
 
 @input_error
-def add_contact(name, phone):
+def add_contact(*args):
+    name = args[0]
+    phone = args[1]
     name_field = Name(name)
     record = Record(name_field)
     record.add_phone(phone)
@@ -59,7 +61,9 @@ def add_contact(name, phone):
 
 
 @input_error
-def change_phone(name, phone):
+def change_phone(*args):
+    name = args[0]
+    phone = args[1]
     record = address_book.data.get(name)
     if record:
         #old_phone = record.phones[0]
@@ -70,7 +74,8 @@ def change_phone(name, phone):
 
 
 @input_error
-def get_phone(name):
+def get_phone(*args):
+    name = args[0]
     record = address_book.data.get(name)
     if record:
         phone_numbers = ", ".join(record.phones)
@@ -80,7 +85,7 @@ def get_phone(name):
 
 
 @input_error
-def show_all_contacts():
+def show_all_contacts(*args):
     if not address_book.data:
         return "There are no contacts saved."
 
@@ -92,43 +97,79 @@ def show_all_contacts():
     return result
 
 
+def greeting_command(*args):
+    return "How can I help you?"
+
+
+def exit_command(*args):
+    return "Good bye!"
+
+
+def unknown_command(*args):
+    return "Invalid command. Please try again."
+
+
+COMMANDS = {add_contact: ("add", ),
+            change_phone: ("change",),
+            get_phone: ("phone",),
+            show_all_contacts: ("show all", ),
+            greeting_command: ("hello", ),
+            exit_command: ("good bye", "close", "exit")
+            }
+
+
+def parser(user_input):
+    for command, kwds in COMMANDS.items():
+        for kwd in kwds:
+            if user_input.lower().startswith(kwds):
+                return command, user_input[len(kwd):].strip().split()
+    return unknown_command, []
+
+
 def main():
     # print("How can I help you?")
     while True:
-        user_input = input(">>>").strip().lower()
-
-        if user_input in ("good bye", "close", "exit"):
-            print("Good bye!")
+        user_input = input(">>>")
+        
+        func, data = parser(user_input)
+        
+        print(func(*data))
+        
+        if func == exit_command:
             break
 
-        if user_input == "hello":
-            print("How can I help you?")
+        # if user_input in ("good bye", "close", "exit"):
+        #     print()
+        #     break
 
-        elif user_input.startswith("add "):
-            data = user_input[4:].split(" ")
-            if len(data) != 2:
-                print("Give me name and phone please")
-            else:
-                name, phone = data
-                print(add_contact(name, phone))
+        # if user_input == "hello":
+        #     print("How can I help you?")
 
-        elif user_input.startswith("change "):
-            data = user_input[7:].split(" ")
-            if len(data) != 2:
-                print("Give me name and phone please")
-            else:
-                name, phone = data
-                print(change_phone(name, phone))
+        # elif user_input.startswith("add "):
+        #     data = user_input[4:].split(" ")
+        #     if len(data) != 2:
+        #         print("Give me name and phone please")
+        #     else:
+        #         name, phone = data
+        #         print(add_contact(name, phone))
 
-        elif user_input.startswith("phone "):
-            name = user_input[6:].strip()
-            print(get_phone(name))
+        # elif user_input.startswith("change "):
+        #     data = user_input[7:].split(" ")
+        #     if len(data) != 2:
+        #         print("Give me name and phone please")
+        #     else:
+        #         name, phone = data
+        #         print(change_phone(name, phone))
 
-        elif user_input == "show all":
-            print(show_all_contacts())
+        # elif user_input.startswith("phone "):
+        #     name = user_input[6:].strip()
+        #     print(get_phone(name))
 
-        else:
-            print("Invalid command. Please try again.")
+        # elif user_input == "show all":
+        #     print(show_all_contacts())
+
+        # else:
+        #     print("Invalid command. Please try again.")
 
 
 if __name__ == "__main__":
