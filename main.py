@@ -5,10 +5,16 @@ class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
 
+
 class Field:
     def __init__(self, value=None):
         self.value = value
 
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return str(self)
 
 class Name(Field):
     pass
@@ -19,7 +25,7 @@ class Phone(Field):
 
 
 class Record:
-    def __init__(self, name):
+    def __init__(self, name: Name, phone: Phone = None) -> None:
         self.name = name
         self.phones = []
 
@@ -35,6 +41,7 @@ class Record:
             self.phones[index] = new_phone
         else:
             raise ValueError("Phone number not found.")
+
 
 def input_error(func):
     def wrapper(*args, **kwargs):
@@ -66,7 +73,7 @@ def change_phone(*args):
     phone = args[1]
     record = address_book.data.get(name)
     if record:
-        #old_phone = record.phones[0]
+        # old_phone = record.phones[0]
         record.phones[0] = phone
         return f"Phone number for contact '{name}' has been updated to '{phone}'."
     else:
@@ -130,47 +137,15 @@ def main():
     # print("How can I help you?")
     while True:
         user_input = input(">>>")
-        
+
         func, data = parser(user_input)
-        
+
         print(func(*data))
-        
+
         if func == exit_command:
             break
-
-        # if user_input in ("good bye", "close", "exit"):
-        #     print()
-        #     break
-
-        # if user_input == "hello":
-        #     print("How can I help you?")
-
-        # elif user_input.startswith("add "):
-        #     data = user_input[4:].split(" ")
-        #     if len(data) != 2:
-        #         print("Give me name and phone please")
-        #     else:
-        #         name, phone = data
-        #         print(add_contact(name, phone))
-
-        # elif user_input.startswith("change "):
-        #     data = user_input[7:].split(" ")
-        #     if len(data) != 2:
-        #         print("Give me name and phone please")
-        #     else:
-        #         name, phone = data
-        #         print(change_phone(name, phone))
-
-        # elif user_input.startswith("phone "):
-        #     name = user_input[6:].strip()
-        #     print(get_phone(name))
-
-        # elif user_input == "show all":
-        #     print(show_all_contacts())
-
-        # else:
-        #     print("Invalid command. Please try again.")
 
 
 if __name__ == "__main__":
     main()
+    
