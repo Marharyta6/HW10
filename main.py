@@ -7,7 +7,7 @@ class AddressBook(UserDict):
 
 
 class Field:
-    def __init__(self, value=None):
+    def __init__(self, value):
         self.value = value
 
     def __str__(self) -> str:
