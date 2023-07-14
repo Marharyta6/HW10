@@ -1,11 +1,5 @@
 from collections import UserDict
 
-
-class AddressBook(UserDict):
-    def add_record(self, record):
-        self.data[record.name.value] = record
-
-
 class Field:
     def __init__(self, value):
         self.value = value
@@ -28,19 +22,33 @@ class Record:
     def __init__(self, name: Name, phone: Phone = None) -> None:
         self.name = name
         self.phones = []
+        if phone:
+            self.phones.append(phone)
 
-    def add_phone(self, phone):
-        self.phones.append(phone)
+    def add_phone(self, phone: Phone):
+        if phone.value not in [p.value for p in self.phones]:
+            self.phones.append(phone)
+            return f"phone {phone} add to contact {self.name}"
+        return f"{phone} present in phones of contact {self.name}"
 
-    def remove_phone(self, phone):
-        self.phones.remove(phone)
+    def change_phone(self, old_phone, new_phone):
+        for idx, p in enumerate(self.phones):
+            if old_phone.value == p.value:
+                self.phones[idx] = new_phone
+                return f"old phone {old_phone} change to {new_phone}"
+        return f"{old_phone} not present in phones of contact {self.name}"
 
-    def edit_phone(self, old_phone, new_phone):
-        if old_phone in self.phones:
-            index = self.phones.index(old_phone)
-            self.phones[index] = new_phone
-        else:
-            raise ValueError("Phone number not found.")
+    def __str__(self) -> str:
+        return f"{self.name}: {', '.join(str(p) for p in self.phones)}"
+    
+
+class AddressBook(UserDict):
+    def add_record(self, record: Record):
+        self.data[str(record.name)] = record
+        return f"Contact {record} add success"
+
+    def __str__(self) -> str:
+        return "\n".join(str(r) for r in self.data.values())
 
 
 def input_error(func):
@@ -58,50 +66,49 @@ address_book = AddressBook()
 
 @input_error
 def add_contact(*args):
-    name = args[0]
-    phone = args[1]
-    name_field = Name(name)
-    record = Record(name_field)
-    record.add_phone(phone)
-    address_book.add_record(record)
-    return f"Contact '{name}' with phone number '{phone}' has been added."
+    name = Name(args[0])
+    phone = Phone(args[1])
+    rec: Record = address_book.get(str(name))
+    if rec:
+        return rec.add_phone(phone)
+    rec = Record(name, phone)
+    return address_book.add_record(rec)
 
 
 @input_error
 def change_phone(*args):
-    name = args[0]
-    phone = args[1]
-    record = address_book.data.get(name)
-    if record:
-        # old_phone = record.phones[0]
-        record.phones[0] = phone
-        return f"Phone number for contact '{name}' has been updated to '{phone}'."
-    else:
-        raise KeyError(f"Contact '{name}' not found.")
+    name = Name(args[0])
+    old_phone = Phone(args[1])
+    new_phone = Phone(args[2])
+    rec: Record = address_book.get(str(name))
+    if rec:
+        return rec.change_phone(old_phone, new_phone)
+    return f"No contact {name} in address book"
 
 
 @input_error
 def get_phone(*args):
-    name = args[0]
-    record = address_book.data.get(name)
-    if record:
-        phone_numbers = ", ".join(record.phones)
-        return f"The phone number(s) for '{name}' is/are: {phone_numbers}."
+    name = Name(args[0])
+    #record = Record(name)
+    rec: Record = address_book.get(str(name))
+    if rec:
+        return f"The phone number(s) for '{name}' is/are: {', '.join(str(p) for p in rec.phones)}."
     else:
         raise KeyError(f"Contact '{name}' not found.")
 
 
 @input_error
 def show_all_contacts(*args):
-    if not address_book.data:
-        return "There are no contacts saved."
+    return address_book
+    # if not address_book.data:
+    #     return "There are no contacts saved."
 
-    result = ""
-    for name, record in address_book.data.items():
-        phone_numbers = ", ".join(record.phones)
-        result += f"{name}: {phone_numbers}\n"
+    # result = ""
+    # for name, record in address_book.data.items():
+    #     phone_numbers = ", ".join(record.phones)
+    #     result += f"{name}: {phone_numbers}\n"
 
-    return result
+    #return result
 
 
 def greeting_command(*args):
